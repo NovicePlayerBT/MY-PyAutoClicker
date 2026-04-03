@@ -1,4 +1,4 @@
-# import lib, python -m pip install pyautogui mouse customtkinter
+# import lib, python -m pip install pyautogui mouse customtkinter keyboard
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
