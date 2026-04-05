@@ -1,4 +1,4 @@
-# import lib, python -m pip install pyautogui mouse customtkinter keyboard
+# import lib, python -m pip install pyautogui mouse customtkinter
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
@@ -42,15 +42,27 @@ clicks_mode_listbox.set(clicks_mode_option[0])
 clicks_mode_listbox.place(x=120, y=10)
 
 # Text Label for click frequenze
-ClickTimeSet = tk.Label(root, text="Time", font=("Arial", 10, 'normal'))
+ClickTimeSet = tk.Label(root, text="Delay", font=("Arial", 10, 'normal'))
 ClickTimeSet.place(x=340, y=10)
 ClickTimeSet = tk.Label(root, text="ms", font=("Arial", 10, 'normal'))
 ClickTimeSet.place(x=500, y=10)
 
+# Delay Entry Box
+click_delay_ms = ttk.Entry(root, justify='right', width=12, validate='key', validatecommand=vcmd)
+click_delay_ms.insert(0, "100")
+click_delay_ms.place(x=390,  y=10)
+
+# Text Label for click Time
+ClickTimeSet = tk.Label(root, text="Time", font=("Arial", 10, 'normal'))
+ClickTimeSet.place(x=340, y=50)
+ClickTimeSet = tk.Label(root, text="click [0 = inf]", font=("Arial", 10, 'normal'))
+ClickTimeSet.place(x=500, y=50)
+
 # Time Entry Box
 click_time_ms = ttk.Entry(root, justify='right', width=12, validate='key', validatecommand=vcmd)
-click_time_ms.insert(0, "100")
-click_time_ms.place(x=390,  y=10)
+click_time_ms.insert(0, "0")
+click_time_ms.place(x=390,  y=50)
+
 
 # Create Widget
 check_box_mouse_pos = tk.Checkbutton(root, text="Set Position Mode",  variable=set_mouse_position, font=("Arial", 10,  'normal'))
@@ -97,29 +109,49 @@ check_box_mouse_pos.place(x=20, y=50)
 RunBtn = tk.Button(root, text="Run Auto Click", width=20, height=1, font=("Arial", 14, 'bold'), bg='gray', fg='white')
 
 def excute():
-    while run_status_var.get():
-        try:
-            interval = int(click_time_ms.get()) / 1000
-        except:
-            interval = 0.1
+    if int(click_time_ms.get()) == 0:
+        while run_status_var.get():
+            try:
+                interval = int(click_delay_ms.get()) / 1000
+            except:
+                interval = 0.1
+                
+            if set_mouse_position.get():
+                # คลิกตามตำแหน่งที่ตั้งไว้
+                pg.moveTo(x=x.get(), y=y.get())
+                mouse.click(button=clicks_mode_listbox.get())
+            else:
+                # คลิกตรงที่เมาส์วางอยู่
+                mouse.click(button=clicks_mode_listbox.get())
             
-        if set_mouse_position.get():
-            # คลิกตามตำแหน่งที่ตั้งไว้
-            pg.moveTo(x=x.get(), y=y.get())
-            mouse.click(button=clicks_mode_listbox.get())
-        else:
-            # คลิกตรงที่เมาส์วางอยู่
-            mouse.click(button=clicks_mode_listbox.get())
-        
-        if keyboard.is_pressed('ctrl'): stop()
-        t.sleep(interval)
+            if keyboard.is_pressed('ctrl'): stop()
+            t.sleep(interval)
+    else:
+        for i in range(0, int(click_time_ms.get())):
+            try:
+                interval = int(click_delay_ms.get()) / 1000
+            except:
+                interval = 0.1
+                
+            if set_mouse_position.get():
+                # คลิกตามตำแหน่งที่ตั้งไว้
+                pg.moveTo(x=x.get(), y=y.get())
+                mouse.click(button=clicks_mode_listbox.get())
+            else:
+                # คลิกตรงที่เมาส์วางอยู่
+                mouse.click(button=clicks_mode_listbox.get())
+            
+            if keyboard.is_pressed('ctrl'): break
+            t.sleep(interval)
+        stop()
+
 
 def stop():
     run_status_var.set(False)
     RunBtn.configure(text='Run Auto Click', bg='gray')
 
 def run():
-    RunBtn.configure(text='Kill Auto Click', bg='red')
+    RunBtn.configure(text='Kill Auto Click [Ctrl]', bg='red')
     if not run_status_var.get():
         run_status_var.set(True)
         threading.Thread(target=excute, daemon=True).start()
